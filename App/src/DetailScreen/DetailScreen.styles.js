@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     },
     detailRowStyle: {
         width: width,
-        height: verticalScale(40),
+        paddingVertical: verticalScale(10),
         flexDirection: "row",
         justifyContent: "space-between",
         paddingHorizontal: normalScale(12),

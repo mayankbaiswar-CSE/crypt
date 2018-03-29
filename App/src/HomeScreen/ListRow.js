@@ -15,7 +15,7 @@ export default class ListRow extends React.PureComponent {
         return (
             <TouchableOpacity
                 activeOpacity={0.7}
-                onPress={this.props.onPress}
+                onPress={this.onCurrencyPress}
             >
                 <View style={styles.container}>
 
@@ -35,6 +35,11 @@ export default class ListRow extends React.PureComponent {
                 </View>
             </TouchableOpacity>
         );
+    }
+
+    onCurrencyPress = () => {
+        const { currency } = this.props;
+        this.props.onPress(currency);
     }
 }
 

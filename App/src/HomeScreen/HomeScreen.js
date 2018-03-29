@@ -21,6 +21,7 @@ import { verticalScale } from '../config/device/normalize';
 import ListRow from './ListRow';
 import { width } from '../config/device/device';
 import fonts from '../../assets/fonts';
+import Debounce from '../widgets/Debounce';
 
 class Home extends Component {
 
@@ -33,6 +34,7 @@ class Home extends Component {
             isConnected: true
         };
         this.retryGetCurrency = this._retryGetCurrency.bind(this);
+        this.itemPress = Debounce(this.openDetails.bind(this), 800, { leading: true, trailing: false });
     }
 
     componentDidMount() {
@@ -96,7 +98,8 @@ class Home extends Component {
                     contentContainerStyle={{ paddingHorizontal: 12 }}
                     renderItem={({ item, index }) => {
                         return <ListRow
-                            onPress={this.openDetails.bind(this, item)}
+                            currency={item}
+                            onPress={this.itemPress}
                             price_inr={item.price_inr}
                             percent_change_24h={item.percent_change_24h}
                             symbol={item.symbol}

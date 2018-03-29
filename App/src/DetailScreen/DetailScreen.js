@@ -100,6 +100,8 @@ class Details extends Component {
                         color: '#ffffff'
                     }}>Volume in 24h</Text>
                     <Text style={{
+                        flex: 1,
+                        textAlign: "right",
                         fontFamily: fonts.MontserratLight,
                         color: '#ffffff'
                     }}>{'₹ ' + currency['24h_volume_inr']}</Text>
