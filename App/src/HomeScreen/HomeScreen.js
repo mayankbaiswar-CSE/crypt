@@ -6,7 +6,6 @@ import {
     View, NetInfo, FlatList, ActivityIndicator
 } from 'react-native';
 import Header from '../widgets/Header';
-import { LargeList } from "react-native-largelist";
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as HomeActions from './Actions';
@@ -128,7 +127,6 @@ class Home extends Component {
     async onRefresh() {
         let isConnected = await NetInfo.isConnected.fetch();
         if (isConnected) {
-            console.log(this.props);
             this.start = 0;
             this.props.getCurrencies(true, false, this.start, this.limit);
             this.setState({ isConnected });

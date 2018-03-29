@@ -3,7 +3,8 @@ import {
     Platform,
     StyleSheet,
     Text,
-    View, NetInfo
+    View, NetInfo, ScrollView,
+    InteractionManager
 } from 'react-native';
 import Header from '../widgets/Header';
 import { bindActionCreators } from 'redux';
@@ -18,7 +19,9 @@ import makeInterceptedRequest, { addBasicInterceptors } from '../../../lib/libap
 import ErrorView from '../widgets/ErrorView';
 import fonts from '../../assets/fonts';
 import normalize, { verticalScale } from '../config/device/normalize';
-
+import GraphView from './GraphView';
+import moment from 'moment';
+import nextFrame from 'next-frame';
 class Details extends Component {
 
     constructor(props) {
@@ -32,11 +35,27 @@ class Details extends Component {
         const isConnected = await NetInfo.isConnected.fetch();
         if (isConnected) {
             const { state: { params } } = this.props.navigation;
-            console.log(params.currency);
-            this.props.getGraphData(params.currency.id, Date.now() - 24 * 3600 * 1000, Date.now());
+            this.fetchGraphData(moment().subtract(1, 'd').valueOf(), moment().valueOf());
         } else {
             this.setState({ isConnected });
         }
+        await nextFrame();
+    }
+
+    componentWillMount() {
+        const { currencyData } = this.props.state;
+        if (currencyData && currencyData.price_usd && currencyData.price_usd.length !== 0) {
+            this._resetAllGraphData();
+        }
+    }
+
+    componentWillUnmount() {
+        this._resetAllGraphData();
+    }
+
+    _resetAllGraphData() {
+        const { resetCurrencyGraphData } = this.props.actions;
+        resetCurrencyGraphData();
     }
 
     _onBackPress = () => {
@@ -49,7 +68,7 @@ class Details extends Component {
             <View style={{ flex: 1, justifyContent: "center" }}>
                 <ErrorView
                     errorText={"oops! Something went wrong."}
-                    onPress={this.props.getGraphData.bind(this, params.currency.id, Date.now() - 24 * 3600 * 1000, Date.now())}
+                    onPress={this.fetchGraphData.bind(this, moment().subtract(1, 'd').valueOf(), moment().valueOf())}
                 />
             </View>
         );
@@ -165,11 +184,33 @@ class Details extends Component {
         );
     }
 
+    returnGraphData(graphData) {
+        let graphPoints = [];
+        graphPoints = graphData.map((item) =>
+            ({ x: moment(item[0]).format('MMM D, LT'), y: item[1] }));
+        return graphPoints;
+    }
+
+    async fetchGraphData(start, end) {
+        let isConnected = await NetInfo.isConnected.fetch();
+        if (isConnected) {
+            const { state: { params } } = this.props.navigation;
+            this._resetAllGraphData();
+            this.props.getGraphData(params.currency.id, start, end);
+        } else {
+            this.setState({ isConnected });
+        }
+    }
+
     renderDetail(currency) {
         let last_updated = new Date(currency.last_updated);
-        console.log("last_updated: ", currency.last_updated);
+        const { currencyData, loading } = this.props.state;
+        let data = [];
+        if (currencyData && currencyData.price_usd && currencyData.price_usd.length !== 0) {
+            data = this.returnGraphData(currencyData.price_usd);
+        }
         return (
-            <View style={{ flex: 1 }}>
+            <ScrollView style={{ flex: 1 }}>
                 <View style={{ alignItems: "center", padding: 12, marginVertical: verticalScale(24) }} >
                     <View>
                         <Text style={{
@@ -183,7 +224,8 @@ class Details extends Component {
                     </View>
                 </View>
                 {this.getDetailView(currency)}
-            </View>
+                {currencyData && <GraphView detail={this} loading={loading} data={data} />}
+            </ScrollView>
         );
     }
 
@@ -196,8 +238,6 @@ class Details extends Component {
                 {!this.state.isConnected && this.renderError()}
 
                 {this.state.isConnected && this.renderDetail(currency)}
-
-
             </View>
         );
     }
