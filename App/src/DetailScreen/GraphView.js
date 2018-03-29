@@ -44,7 +44,7 @@ class GraphView extends PureComponent {
                 <View style={{
                     height: verticalScale(300), width: width, marginHorizontal: 24, marginTop: 12,
                     alignSelf: "center",
-                    backgroundColor: data.length !== 0 ? '#ffffff' : 'transparent'
+                    backgroundColor: '#ffffff'
                 }}>
                     {data.length !== 0 && <PureChart height={verticalScale(200)} width={normalScale(300)} data={data} type='line' />}
 
